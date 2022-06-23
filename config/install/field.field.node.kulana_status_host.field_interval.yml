@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_interval
+    - node.type.kulana_status_host
+id: node.kulana_status_host.field_interval
+field_name: field_interval
+entity_type: node
+bundle: kulana_status_host
+label: Interval
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: 1
+  max: null
+  prefix: ''
+  suffix: ' minute(s)'
+field_type: integer

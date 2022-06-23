@@ -1,0 +1,16 @@
+{
+    "name": "ohanome/kulana",
+    "description": "Drupal integration for kulana by ohano",
+    "type": "drupal-module",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "boatware",
+            "homepage": "https://github.com/boatware"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "drupal/core": "^9.3"
+    }
+}

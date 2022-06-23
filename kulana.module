@@ -1,0 +1,48 @@
+<?php
+
+function kulana_preprocess_node__kulana_status_host(&$variables) {
+  $host = $variables['node'];
+  $url = $host->get('field_url')->uri;
+  $entryIds = \Drupal::entityQuery('status_entry')
+    ->condition('url', $url)
+    ->sort('created', 'DESC')
+    ->execute();
+  $entries = [];
+  foreach ($entryIds as $entryId) {
+    $singleEntry = \Drupal::entityTypeManager()
+      ->getStorage('status_entry')
+      ->load($entryId);
+    if ($singleEntry) {
+      $entries[] = [
+        'created' => (new \DateTime())->setTimestamp($singleEntry->get('created')->value)->format('Y-m-d H:i:s'),
+        'time' => $singleEntry->get('time')->value,
+        'status' => $singleEntry->get('status')->value,
+        'destination' => $singleEntry->get('destination')->value,
+        'content_length' => $singleEntry->get('content_length')->value,
+      ];
+    }
+  }
+
+  $variables['entries'] = $entries;
+  $variables['#cache']['max-age'] = 0;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function kulana_theme($existing, $type, $theme, $path) {
+  return [
+    'node__kulana_status_host' => [
+      'base hook' => 'node',
+    ]
+  ];
+}
+
+/**
+ * Implements hook_cron().
+ */
+function kulana_cron() {
+  /** @var \Drupal\kulana\Service\KulanaService $kulana_service */
+  $kulana_service = \Drupal::service('kulana.kulana');
+  $kulana_service->executeAll();
+}

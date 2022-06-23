@@ -1,0 +1,25 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - field.field.node.kulana_status_host.field_interval
+    - field.field.node.kulana_status_host.field_last_fetch
+    - field.field.node.kulana_status_host.field_url
+    - node.type.kulana_status_host
+  module:
+    - user
+id: node.kulana_status_host.teaser
+targetEntityType: node
+bundle: kulana_status_host
+mode: teaser
+content:
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden:
+  field_interval: true
+  field_last_fetch: true
+  field_url: true

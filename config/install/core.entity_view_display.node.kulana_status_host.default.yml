@@ -1,0 +1,53 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.kulana_status_host.field_interval
+    - field.field.node.kulana_status_host.field_last_fetch
+    - field.field.node.kulana_status_host.field_url
+    - node.type.kulana_status_host
+  module:
+    - datetime
+    - link
+    - user
+id: node.kulana_status_host.default
+targetEntityType: node
+bundle: kulana_status_host
+mode: default
+content:
+  field_interval:
+    type: number_integer
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 102
+    region: content
+  field_last_fetch:
+    type: datetime_default
+    label: above
+    settings:
+      timezone_override: ''
+      format_type: medium
+    third_party_settings: {  }
+    weight: 103
+    region: content
+  field_url:
+    type: link
+    label: above
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+    third_party_settings: {  }
+    weight: 101
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden: {  }
