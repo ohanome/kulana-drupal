@@ -11,7 +11,20 @@ class KulanaService {
 
   public function fetchStatus(string $url) {
     $client = new Client();
-    $status = $client->get("https://kulana.ohano.me/status?url=$url&checkCertificate=1")->getBody()->getContents();
+    $config = \Drupal::config('kulana.settings');
+    $baseUrl = $config->get('kulana_url');
+    if (
+      // If $baseUrl is empty,
+      empty($baseUrl) ||
+      // or if $baseUrl is not a valid URL,
+      !filter_var($baseUrl, FILTER_VALIDATE_URL) ||
+      // or if $baseUrl is not an HTTPS URL,
+      !str_contains($baseUrl, 'https://')) {
+      // then set the base URL to the default value.
+      $baseUrl = 'https://kulana.ohano.me';
+    }
+
+    $status = $client->get("$baseUrl/status?url=$url&checkCertificate=1")->getBody()->getContents();
 
     if ($status == NULL) {
       return NULL;

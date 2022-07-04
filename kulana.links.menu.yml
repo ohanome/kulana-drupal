@@ -1,0 +1,9 @@
+kulana.config_wrapper:
+  title: Kulana
+  route_name: kulana.config_wrapper
+  parent: system.admin_config
+  weight: -100
+kulana.config:
+  title: Main configuration
+  route_name: kulana.config
+  parent: kulana.config_wrapper

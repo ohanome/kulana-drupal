@@ -1,7 +1,14 @@
 kulana.config:
-  path: /admin/config/kulana
+  path: /admin/config/kulana/config
   defaults:
     _form: Drupal\kulana\Form\Config\KulanaConfigForm
     _title: 'Kulana config'
+  requirements:
+    _permission: 'administer kulana config'
+kulana.config_wrapper:
+  path: /admin/config/kulana
+  defaults:
+    _controller: Drupal\system\Controller\SystemController::systemAdminMenuBlockPage
+    _title: 'Kulana'
   requirements:
     _permission: 'administer kulana config'
