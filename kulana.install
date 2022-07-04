@@ -1,0 +1,38 @@
+<?php
+
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
+use Drupal\kulana\Entity\StatusEntry;
+
+/**
+ * Installs certificate fields to the status entry entity.
+ */
+function kulana_update_9001(&$sandbox) {
+  $field = BaseFieldDefinition::create('boolean')
+    ->setDefaultValue(FALSE);
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('certificate_valid', StatusEntry::ENTITY_ID, StatusEntry::ENTITY_ID, $field);
+
+  $field = BaseFieldDefinition::create('datetime')
+    ->setDefaultValue((new \DateTime())->setTimestamp(0)->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT));
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('certificate_valid_until', StatusEntry::ENTITY_ID, StatusEntry::ENTITY_ID, $field);
+
+  $field = BaseFieldDefinition::create('string')
+    ->setDefaultValue('none');
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('certificate_issuer', StatusEntry::ENTITY_ID, StatusEntry::ENTITY_ID, $field);
+
+  $field = BaseFieldDefinition::create('boolean')
+    ->setDefaultValue(FALSE);
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('ssl_redirect', StatusEntry::ENTITY_ID, StatusEntry::ENTITY_ID, $field);
+
+  foreach (StatusEntry::loadMultiple() as $statusEntry) {
+    $statusEntry->set('certificate_valid', FALSE);
+    $statusEntry->set('certificate_valid_until', (new \DateTime())->setTimestamp(0)->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT));
+    $statusEntry->set('certificate_issuer', 'none');
+    $statusEntry->set('ssl_redirect', FALSE);
+    $statusEntry->save();
+  }
+}

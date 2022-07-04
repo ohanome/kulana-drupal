@@ -1,0 +1,7 @@
+kulana.config:
+  path: /admin/config/kulana
+  defaults:
+    _form: Drupal\kulana\Form\Config\KulanaConfigForm
+    _title: 'Kulana config'
+  requirements:
+    _permission: 'administer kulana config'

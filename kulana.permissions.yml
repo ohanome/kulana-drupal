@@ -1,0 +1,3 @@
+administer kulana config:
+  title: 'Administer Kulana config'
+  restrict access: true

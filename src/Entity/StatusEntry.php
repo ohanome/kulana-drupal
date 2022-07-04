@@ -5,6 +5,7 @@ namespace Drupal\kulana\Entity;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 
 /**
  * Defines the StatusEntry entity.
@@ -27,6 +28,8 @@ use Drupal\Core\Field\BaseFieldDefinition;
  */
 class StatusEntry extends ContentEntityBase {
 
+  const ENTITY_ID = 'status_entry';
+
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = [];
 
@@ -46,6 +49,14 @@ class StatusEntry extends ContentEntityBase {
     $fields['time'] = BaseFieldDefinition::create('float');
     $fields['content_length'] = BaseFieldDefinition::create('integer');
     $fields['destination'] = BaseFieldDefinition::create('string');
+    $fields['certificate_valid'] = BaseFieldDefinition::create('boolean')
+      ->setDefaultValue(FALSE);
+    $fields['certificate_valid_until'] = BaseFieldDefinition::create('datetime')
+      ->setDefaultValue((new \DateTime())->setTimestamp(0)->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT));
+    $fields['certificate_issuer'] = BaseFieldDefinition::create('string')
+      ->setDefaultValue('none');
+    $fields['ssl_redirect'] = BaseFieldDefinition::create('boolean')
+      ->setDefaultValue(FALSE);
 
     return $fields;
   }

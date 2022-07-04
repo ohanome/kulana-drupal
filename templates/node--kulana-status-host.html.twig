@@ -100,6 +100,10 @@
         <td>Time</td>
         <td>Destination</td>
         <td>Content-Length</td>
+        <td>Certificate valid</td>
+        <td>Certificate valid until</td>
+        <td>Certificate issuer</td>
+        <td>SSL redirect</td>
       </tr>
       </thead>
       <tbody>
@@ -110,6 +114,10 @@
           <td>{{ entry.time }}</td>
           <td>{{ entry.destination }}</td>
           <td>{{ entry.content_length }}</td>
+          <td>{{ entry.certificate_valid }}</td>
+          <td>{{ entry.certificate_valid_until }}</td>
+          <td>{{ entry.certificate_issuer }}</td>
+          <td>{{ entry.ssl_redirect }}</td>
         </tr>
       {% endfor %}
       </tbody>

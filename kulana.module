@@ -13,12 +13,19 @@ function kulana_preprocess_node__kulana_status_host(&$variables) {
       ->getStorage('status_entry')
       ->load($entryId);
     if ($singleEntry) {
+      $created = (new \DateTime())->setTimestamp($singleEntry->get('created')->value)->format('Y-m-d H:i:s');
+      $validUntil = DateTime::createFromFormat(\Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface::DATETIME_STORAGE_FORMAT, $singleEntry->get('certificate_valid_until')->value)->format('Y-m-d H:i:s');
+
       $entries[] = [
-        'created' => (new \DateTime())->setTimestamp($singleEntry->get('created')->value)->format('Y-m-d H:i:s'),
+        'created' => $created,
         'time' => $singleEntry->get('time')->value,
         'status' => $singleEntry->get('status')->value,
         'destination' => $singleEntry->get('destination')->value,
         'content_length' => $singleEntry->get('content_length')->value,
+        'certificate_valid' => $singleEntry->get('certificate_valid')->value,
+        'certificate_valid_until' => $validUntil,
+        'certificate_issuer' => $singleEntry->get('certificate_issuer')->value,
+        'ssl_redirect' => $singleEntry->get('ssl_redirect')->value,
       ];
     }
   }

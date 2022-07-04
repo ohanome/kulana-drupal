@@ -2,25 +2,17 @@
 
 namespace Drupal\kulana\Service;
 
+use DateTime;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\node\Entity\Node;
+use GuzzleHttp\Client;
 
 class KulanaService {
-  public function isInstalled(): bool {
-    $returnCode = shell_exec("which kulana");
-    if ($returnCode == NULL) {
-      \Drupal::messenger()->addError(t('Kulana is not installed. Please install it first. Refer to <a href="@url">Kulana installation instructions</a>.', ['@url' => 'https://github.com/ohanome/kulana']));
-      return FALSE;
-    }
-
-    return TRUE;
-  }
 
   public function fetchStatus(string $url) {
-    if (!$this->isInstalled()) {
-      return NULL;
-    }
+    $client = new Client();
+    $status = $client->get("https://kulana.ohano.me/status?url=$url&checkCertificate=1")->getBody()->getContents();
 
-    $status = shell_exec("kulana status --url $url --include destination --include content_length --json");
     if ($status == NULL) {
       return NULL;
     }
@@ -30,13 +22,17 @@ class KulanaService {
     return json_decode($status, TRUE);
   }
 
-  public function saveStatus(string $url, int $status, float $time, string $destination, int $contentLength) {
+  public function saveStatus(string $url, int $status, float $time, string $destination, int $contentLength, bool $certificateValid, DateTime $certificateValidUntil, string $certificateIssuer, bool $sslRedirect) {
     $statusEntry = \Drupal::entityTypeManager()->getStorage('status_entry')->create([
       'url' => $url,
       'status' => $status,
       'time' => $time,
       'destination' => $destination,
       'content_length' => $contentLength,
+      'certificate_valid' => $certificateValid,
+      'certificate_valid_until' => $certificateValidUntil->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT),
+      'certificate_issuer' => $certificateIssuer,
+      'ssl_redirect' => $sslRedirect,
     ]);
     $statusEntry->save();
     return $statusEntry;
@@ -61,22 +57,49 @@ class KulanaService {
       }
     }
 
+    /** @noinspection HttpUrlsUsage */
+    $unsafeUrl = str_replace('https://', 'http://', $url);
+
     $status = $this->fetchStatus($url);
+    $sslRedirectStatus = $this->fetchStatus($unsafeUrl);
     if ($status == NULL) {
       \Drupal::logger('kulana')->error("Failed to fetch status for $url");
       return;
     }
-    $this->saveStatus($status['url'], $status['status'], $status['time'], $status['destination'] ?? $status['url'], $status['content_length'] ?? 0);
+
+    $sslRedirect = FALSE;
+    if ($sslRedirectStatus['status'] >= 300 && $sslRedirectStatus['status'] < 400 && str_contains($sslRedirectStatus['destination'], 'https://')) {
+      $sslRedirect = TRUE;
+    }
+
+    $this->saveStatus(
+      $status['url'],
+      $status['status'],
+      $status['time'],
+      $status['destination'] ?? $status['url'],
+      $status['content_length'] ?? 0,
+      $status['certificate']['valid'],
+      DateTime::createFromFormat('Y-m-d H:i:s', $status['certificate']['valid_until']),
+      $status['certificate']['issuer'],
+      $sslRedirect
+    );
   }
 
   public function executeAll() {
-    $allHostIds = \Drupal::entityQuery("node")
-      ->condition("type", "kulana_status_host")
-      ->execute();
-    foreach ($allHostIds as $hostId) {
-      /** @var Node $host */
-      $host = \Drupal::entityTypeManager()->getStorage("node")->load($hostId);
-      $this->execute($host);
+    $fiber = new \Fiber(function () {
+      $allHostIds = \Drupal::entityQuery("node")
+        ->condition("type", "kulana_status_host")
+        ->execute();
+      foreach ($allHostIds as $hostId) {
+        /** @var Node $host */
+        $host = \Drupal::entityTypeManager()->getStorage("node")->load($hostId);
+        $this->execute($host);
+      }
+    });
+    try {
+      $fiber->start();
+    } catch (\Throwable $e) {
+      \Drupal::logger('kulana')->error($e->getMessage());
     }
   }
 }
